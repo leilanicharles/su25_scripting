@@ -1,0 +1,30 @@
+variable: userInput,compPick;
+variable: userTry=7;
+
+
+generate a random number from 1-100 and hold that variable as compPick;
+	
+	print: "guess a number from 1-100";
+
+every wrong guess the variable userTry will decrease by one;
+
+	print:"enter your guess:" userInput;
+
+and take that input as userInput
+
+while userTry is grater than 0 then ;
+
+	print: "attempts left" userTry "out of 7";
+
+if userTry reaches 0 ;
+	
+	print: "you lost try again?";
+
+if userInput is equal to compPick then;
+	
+	print: "you win play again?";
+
+return to beginning;
+
+ 
+
