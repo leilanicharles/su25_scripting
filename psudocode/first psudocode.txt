@@ -1,0 +1,16 @@
+variables: userInput1-userInput10; odd ;even;
+
+collect userInput;
+
+if userInput % by 2 print: "right";
+
+else print: "left" 
+
+if userInput=0 print: "neither";
+
+repeat for user input 1-10
+
+
+
+
+
