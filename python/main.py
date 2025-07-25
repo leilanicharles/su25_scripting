@@ -1,0 +1,208 @@
+import sys
+import pygame
+import random
+
+
+#
+#you have to click the fish sprites before they touch the bottom of the screen if not its game over
+#
+
+
+#
+#load
+#
+pygame.init() #starts the game
+
+#scenes
+# 0 = title, 1 = game, 2 = gameover / replay
+scene = 2
+
+#load fish 
+fish = pygame.image.load("fish_green.png")
+fish2 = pygame.image.load("fish_orange.png")
+fish3 = pygame.image.load("fish_pink.png")
+
+# added for our power up
+rock = pygame.image.load("rock_a.png")
+
+fishes = [fish, fish2, fish3]
+
+#flipped fish (for aesthetics)
+rfish = pygame.transform.flip(fish, True, False) #flip fish
+
+#setup screen
+width = 600
+height = 400
+size = (width, height)
+screen = pygame.display.set_mode(size)
+pygame.display.set_caption("Don't Let the fish fall!")
+pygame.display.set_icon(fish)
+
+#define colors
+green = (74, 93, 35)
+orange = (243, 121, 78)
+black = (0, 0, 0)
+
+#------------------------------
+#Title and Gameover Page Stuff
+titleY = 100
+titleFont = pygame.font.SysFont("Arial", 65)
+fishesTitle = titleFont.render("It's Raining fish", False, green)
+gameOverTitle = titleFont.render("fish fell", False, green)
+
+playY = 300
+btnMargin = 10
+btnFont = pygame.font.SysFont("Arial", 30)
+playWord = btnFont.render("PLAY", False, green)
+quitWord = btnFont.render("QUIT", False, green)
+restartWord = btnFont.render("RESTART", False, orange)
+
+#rect = screen, color, (x, y, width, height, curve)
+playBtn = pygame.draw.rect(screen, black,((width/2)-(playWord.get_width()/2)- btnMargin, playY-btnMargin, playWord.get_width() + (btnMargin*2), playWord.get_height() + (btnMargin *2)), 0)
+quitBtn = pygame.draw.rect(screen, black,((width/4)-(quitWord.get_width()/2)- btnMargin, playY-btnMargin, quitWord.get_width() + (btnMargin*2), quitWord.get_height() + (btnMargin *2)), 0)
+restartBtn = pygame.draw.rect(screen, green,((width * .75)-(restartWord.get_width()/2)- btnMargin, playY-btnMargin, restartWord.get_width() + (btnMargin*2), restartWord.get_height() + (btnMargin *2)), 0)
+
+#Game Setup (Release the fish)
+counter = 0
+numOfThings = 7 #controls number of fish
+fishImage = []
+fishX = []
+fishY = []
+fishSpeed = []
+baseSpeed = .1
+speedMulti = 1.2
+
+while counter < numOfThings:
+    #add a random fish 
+    fishImage.append(random.choice(fishes))
+    #randomized x value between screen size
+    fishX.append(random.randint(0, width - fish.get_width()))
+    #randomized y value between screen size
+    fishY.append(0 - random.randint(fish.get_height(), fish.get_height() * 2 ))
+    #randomized speed
+    fishSpeed.append((baseSpeed + random.random())/100)
+    counter += 1
+
+#
+# LOOP
+#
+gameOver = False
+while gameOver == False:
+    #quit event:  Pygame 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            gameOver = True
+    #
+    #mouse clicks
+    #
+    if pygame.mouse.get_pressed()[0]: #if left click
+        coords = pygame.mouse.get_pos()
+        if scene == 0: #if title screen
+            if pygame.Rect.collidepoint(playBtn, coords):
+                scene = 1 #go to game
+        
+        elif scene == 1:#gameplay
+            counter = 0
+            while counter < numOfThings:
+                #box collision check
+                if coords[0] >= fishX[counter] and coords[0] <= fishX[counter] +fish.get_width() and coords[1] >= fishY[counter] and coords[1] <= fishY[counter] + fish.get_height():
+                    #Send it back to top with new identity
+                    fishImage[counter] = random.choice(fishes)
+                    fishX[counter] = random.randint(0, width - fish.get_width())
+                    fishY[counter] = 0 - random.randint(fish.get_height(), fish.get_height() * 2 )
+                    #increase the speed
+                    fishSpeed[counter] *= speedMulti
+                counter +=1  
+
+# power up to slowdown our fish and make it esier to click them  (its the rock)
+            if pygame.Rect.collidepoint(rock, coords)
+                baseSpeed - .1
+
+
+        else: #gameover screen
+            #if gameover is clicked
+            if pygame.Rect.collidepoint(quitBtn, coords):
+                gameOver = True
+            #if restart is clicked
+            if pygame.Rect.collidepoint(restartBtn, coords):
+                counter = 0
+                while counter < numOfThings:
+                    fishImage[counter] = random.choice(fishes)
+                    fishX[counter] = random.randint(0, width - fish.get_width())
+                    fishY[counter] = 0 - random.randint(fish.get_height(), fish.get_height() * 2)
+                    fishSpeed[counter] = (baseSpeed + random.random())/ 100
+                    counter += 1
+                scene = 0
+  
+    # update
+    if scene == 1: #game scene
+        counter = 0
+        while counter < numOfThings:
+            #check if hit bottom of screen
+            if fishY[counter] + fish.get_height() > height:
+                #game over
+                scene = 2
+            #step down if not
+          fishY[counter] += fishSpeed[counter]
+            counter +=1
+
+    #draw
+    if scene == 0:
+        screen.fill(orange)
+        #centered title
+        screen.blit(fishesTitle, ((width/2)-(fishesTitle.get_width()/2), titleY))
+        #fish left
+        screen.blit(fish, ((width/2)-(fishesTitle.get_width()/2)-fish.get_width(), titleY+ (fishesTitle.get_height()-fishes.get_height())))       
+        screen.blit(rfish, ((width/2) + (fishesTitle.get_width()/2), titleY+ (fishesTitle.get_height()-fish.get_height())))
+
+        #button changes if mouse is over it
+        coords = pygame.mouse.get_pos()
+        if pygame.Rect.collidepoint(playBtn, coords): #green button
+            playBtn = pygame.draw.rect(screen, green,((width/2)-(playWord.get_width()/2)- btnMargin, playY-btnMargin, playWord.get_width() + (btnMargin*2), playWord.get_height() + (btnMargin *2)), 0)
+        else: #normal button
+            playBtn = pygame.draw.rect(screen, black,((width/2)-(playWord.get_width()/2)- btnMargin, playY-btnMargin, playWord.get_width() + (btnMargin*2), playWord.get_height() + (btnMargin *2)), 0)
+            screen.blit(playWord, ((width/2)-(playWord.get_width()/2), playY))
+    
+    elif scene == 1: #game play
+        screen.fill(green)
+        #draw fish
+        counter = 0
+        while counter < numOfThings:
+            screen.blit(fishImage[counter], (fishX[counter], fishY[counter]))
+         
+         # adding the draw for our powerup
+            screen.blit (rock[counter])
+            counter += 1
+
+    else: #gameover
+        screen.fill(black)
+        #text
+        screen.blit(gameOverTitle, (width/2 - gameOverTitle.get_width()/2, titleY))
+        screen.blit(fishes, ((width/2)-(gameOverTitle.get_width()/2)-fish.get_width(), titleY+ (gameOverTitle.get_height()-fish.get_height())))       
+        screen.blit(rfish, ((width/2) + (gameOverTitle.get_width()/2), titleY+ (gameOverTitle.get_height()-fish.get_height())))
+
+        #buttons
+        #Quit
+        coords = pygame.mouse.get_pos()
+        if pygame.Rect.collidepoint(quitBtn, coords):
+            #if mouse is over quit button it'll be green
+            quitBtn = pygame.draw.rect(screen, green,((width/4)-(quitWord.get_width()/2)- btnMargin, playY-btnMargin, quitWord.get_width() + (btnMargin*2), quitWord.get_height() + (btnMargin *2)), 0)
+        else:
+            quitBtn = pygame.draw.rect(screen, orange,((width/4)-(quitWord.get_width()/2)- btnMargin, playY-btnMargin, quitWord.get_width() + (btnMargin*2), quitWord.get_height() + (btnMargin *2)), 0)
+            screen.blit(quitWord, ((width/4) - (quitWord.get_width()/2), playY))
+        
+        #Restart
+        if pygame.Rect.collidepoint(restartBtn, coords):
+            #if mouse is over restart, turn button orange
+            restartBtn = pygame.draw.rect(screen, orange,((width * .75)-(restartWord.get_width()/2)- btnMargin, playY-btnMargin, restartWord.get_width() + (btnMargin*2), restartWord.get_height() + (btnMargin *2)), 0)
+        else:
+            restartBtn = pygame.draw.rect(screen, green,((width * .75)-(restartWord.get_width()/2)- btnMargin, playY-btnMargin, restartWord.get_width() + (btnMargin*2), restartWord.get_height() + (btnMargin *2)), 0)
+            screen.blit(restartWord,((width *.75) - (restartWord.get_width()/2), playY))
+    
+    #render display
+    pygame.display.flip()
+
+#
+#quit
+#
+pygame.display.quit()
